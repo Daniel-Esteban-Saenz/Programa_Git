@@ -58,32 +58,32 @@ func main() {
 	// Crear la factura
 	invoice := Invoice{ClientName: clientName, Date: date, Products: products, Total: total}
 
-
+	// Generar el PDF
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
-	pdf.SetFont("Arial", "B", 12)
+	pdf.SetFont("Arial", "", 12)
 
-	pdf.SetLineWidth(0.5)
-	pdf.SetLineJoinStyle("D")
-	pdf.Cell(0, 10, "Nombre")
-	pdf.Cell(0, 10, "Cantidad")
-	pdf.Cell(0, 10, "Precio Unitario")
-	pdf.CellFormat(0, 10, "Total", "", 0, "L", false, 0, "")
+	pdf.Cell(0, 10, "Factura")
+	pdf.Ln(10)
+
+	pdf.Cell(0, 10, "Cliente: "+invoice.ClientName)
+	pdf.Ln(10)
+
+	pdf.Cell(0, 10, "Fecha: "+invoice.Date)
+	pdf.Ln(10)
+
+	pdf.Cell(0, 10, "Productos:")
 	pdf.Ln(10)
 
 	for _, product := range invoice.Products {
-		pdf.Cell(0, 10, fmt.Sprintf(product.Name, 1, 0, "L", false, 0))
-		pdf.Cell(0, 10, fmt.Sprintf("%.2f", float64(product.Quantity)))
-		pdf.CellFormat(0, 10, fmt.Sprintf("%.2f", product.Price), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(0, 10, fmt.Sprintf("%.2f", product.Price*float64(product.Quantity)), "1", 0, "C", false, 0,"")
+		pdf.Cell(0, 10, fmt.Sprintf("%s x %d = %.2f", product.Name, product.Quantity, product.Price*float64(product.Quantity)))
 		pdf.Ln(10)
 	}
 
-	pdf.SetFont("Arial", "B", 12)
-	totalString := fmt.Sprintf("Total: %.2f", invoice.Total)
-	pdf.Cell(0, 10, totalString) 
+	pdf.Cell(0, 10, "Total: "+fmt.Sprintf("%.2f", invoice.Total))
 	pdf.Ln(10)
 
+	// Guardar el PDF
 	err := pdf.OutputFileAndClose("factura.pdf")
 	if err != nil {
 		fmt.Println(err)
