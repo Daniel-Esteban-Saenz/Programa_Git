@@ -26,7 +26,7 @@ func main() {
 	fmt.Scanln(&clientName)
 
 	
-	date := time.Now().Format("17/10/2003")
+	date := time.Now().Format("17/10/2003 15:04:05")
 
 	var products []Product
 	for {
@@ -57,6 +57,14 @@ func main() {
 
 	// Crear la factura
 	invoice := Invoice{ClientName: clientName, Date: date, Products: products, Total: total}
+
+	fmt.Println("Nombre: ", clientName)
+	fmt.Println("Fecha: ", date)
+	fmt.Println("Productos:")
+	for _, product := range invoice.Products {
+        fmt.Printf("%s x %d = %.2f\n", product.Name, product.Quantity, product.Price*float64(product.Quantity))
+    }
+	fmt.Printf("Total a pagar: %.2f\n", total)
 
 	// Generar el PDF
 	pdf := gofpdf.New("P", "mm", "A4", "")
