@@ -7,8 +7,8 @@ import (
 )
 
 type Product struct {
-	Name    string
-	Price   float64
+	Name     string
+	Price    float64
 	Quantity int
 }
 
@@ -25,8 +25,7 @@ func main() {
 	fmt.Print("Ingrese el nombre del cliente: ")
 	fmt.Scanln(&clientName)
 
-	
-	date := time.Now().Format("17/10/2003 15:04:05")
+	date := time.Now().Format("02/01/2006 15:04:05")
 
 	var products []Product
 	for {
@@ -62,34 +61,48 @@ func main() {
 	fmt.Println("Fecha: ", date)
 	fmt.Println("Productos:")
 	for _, product := range invoice.Products {
-        fmt.Printf("%s x %d = %.2f\n", product.Name, product.Quantity, product.Price*float64(product.Quantity))
-    }
+		fmt.Printf("%s x %d = %.2f\n", product.Name, product.Quantity, product.Price*float64(product.Quantity))
+	}
 	fmt.Printf("Total a pagar: %.2f\n", total)
 
 	// Generar el PDF
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
-	pdf.SetFont("Arial", "", 12)
-
+	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(0, 10, "Factura")
-	pdf.Ln(10)
+	pdf.Ln(12)
 
+	// Datos del cliente
+	pdf.SetFont("Arial", "", 12)
 	pdf.Cell(0, 10, "Cliente: "+invoice.ClientName)
-	pdf.Ln(10)
+	pdf.Ln(8)
 
+	// Fecha
 	pdf.Cell(0, 10, "Fecha: "+invoice.Date)
-	pdf.Ln(10)
+	pdf.Ln(12)
 
-	pdf.Cell(0, 10, "Productos:")
-	pdf.Ln(10)
+	// Título de tabla
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(40, 10, "Producto", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(30, 10, "Cantidad", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(30, 10, "Precio Unitario", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 10, "Total", "1", 0, "C", false, 0, "")
+	pdf.Ln(-1)
 
+	// Rellenar la tabla con productos
+	pdf.SetFont("Arial", "", 12)
 	for _, product := range invoice.Products {
-		pdf.Cell(0, 10, fmt.Sprintf("%s x %d = %.2f", product.Name, product.Quantity, product.Price*float64(product.Quantity)))
-		pdf.Ln(10)
+		pdf.CellFormat(40, 10, product.Name, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(30, 10, fmt.Sprintf("%d", product.Quantity), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(30, 10, fmt.Sprintf("%.2f", product.Price), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(40, 10, fmt.Sprintf("%.2f", product.Price*float64(product.Quantity)), "1", 0, "C", false, 0, "")
+		pdf.Ln(-1)
 	}
 
-	pdf.Cell(0, 10, "Total: "+fmt.Sprintf("%.2f", invoice.Total))
+	// Total
+	pdf.SetFont("Arial", "B", 12)
 	pdf.Ln(10)
+	pdf.Cell(0, 10, "Total a pagar: "+fmt.Sprintf("%.2f", invoice.Total))
 
 	// Guardar el PDF
 	err := pdf.OutputFileAndClose("factura.pdf")
